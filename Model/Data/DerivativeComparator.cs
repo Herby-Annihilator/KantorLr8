@@ -12,5 +12,11 @@ namespace KantorLr8.Model.Data
 		public double Difference { get => Math.Abs
 				(CalculatedDerivativeValue - RealDerivativeValue);
 		}
+		public DerivativeComparator(double arg, double calculatedValue, double realValue)
+		{
+			Argument = arg;
+			CalculatedDerivativeValue = calculatedValue;
+			RealDerivativeValue = realValue;
+		}
 	}
 }

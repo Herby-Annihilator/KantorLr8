@@ -1,6 +1,7 @@
 ﻿using KantorLr8.Infrastructure.Commands;
 using KantorLr8.Model.Data;
 using KantorLr8.ViewModels.Base;
+using org.mariuszgromada.math.mxparser;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,12 +16,20 @@ namespace KantorLr8.ViewModels
 	{
 		private Action selectedDerivativeFunction;
 
+		private Point _firstPoint;
+		private Point secondPoint;
+		private Point _penultimatePoint;
+		private Point _lastPoint;
+
+
 		public MainWindowViewModel()
 		{
 			selectedDerivativeFunction = CalculateFirstDerivative;
 			SelectCalculatingDeriavtiveCommand = new LambdaCommand(OnSelectCalculatingDeriavtiveCommandExecuted, CanSelectCalculatingDeriavtiveCommandExecute);
 			RemoveSelectedPointInFunctionTableCommand = new LambdaCommand(OnRemoveSelectedPointInFunctionTableCommandExecuted, CanRemoveSelectedPointInFunctionTableCommandExecute);
 			AddNewPointInFunctionTableCommand = new LambdaCommand(OnAddNewPointInFunctionTableCommandExecuted, CanAddNewPointInFunctionTableCommandxecute);
+			GenerateFunctionTableCommand = new LambdaCommand(OnGenerateFunctionTableCommandExecuted, CanGenerateFunctionTableCommandxecute);
+			CalculateDerivativeCommand = new LambdaCommand(OnCalculateDerivativeCommandExecuted, CanCalculateDerivativeCommandxecute);
 		}
 
 		#region Properties
@@ -116,7 +125,30 @@ namespace KantorLr8.ViewModels
 		{
 			try
 			{
-				
+				Function function = new Function(FunctionString);
+				Expression expression;
+				double left = Convert.ToDouble(LeftBoardText);
+				double right = Convert.ToDouble(RightBoardText);
+				double step = Convert.ToDouble(StepdText);
+				FunctionTable.Clear();
+				expression = new Expression($"f({(left - step * 2).ToString().Replace(",", ".")})", function);
+				_firstPoint = new Point(left - step * 2, expression.calculate());
+
+				expression = new Expression($"f({(left - step).ToString().Replace(",", ".")})", function);
+				secondPoint = new Point(left - step, expression.calculate());
+
+				expression = new Expression($"f({(right + step).ToString().Replace(",", ".")})", function);
+				_penultimatePoint = new Point(right + step, expression.calculate());
+
+				expression = new Expression($"f({(right + step * 2).ToString().Replace(",", ".")})", function);
+				_lastPoint = new Point(right + step * 2, expression.calculate());
+
+				for (double i = left; i < right; i += step)
+				{
+					expression = new Expression($"f({i.ToString().Replace(",", ".")})", function);
+					FunctionTable.Add(new Point(i, expression.calculate()));
+				}
+				Status = "Генерация прошла успешно!";
 			}
 			catch (Exception e)
 			{
@@ -127,6 +159,32 @@ namespace KantorLr8.ViewModels
 		{
 			return !(string.IsNullOrWhiteSpace(FunctionString) || string.IsNullOrWhiteSpace(LeftBoardText) || string.IsNullOrWhiteSpace(RightBoardText) || string.IsNullOrWhiteSpace(StepdText));
 		}
+
+		public ICommand CalculateDerivativeCommand { get; }
+		private void OnCalculateDerivativeCommandExecuted(object p)
+		{
+			try
+			{
+				DerivativeTable.Clear();
+				selectedDerivativeFunction();
+				Status = "Рассчеты прошли успешно!";
+			}
+			catch (Exception e)
+			{
+				Status = $"Опреация провалена. Причина: {e.Message}";
+			}
+		}
+		private bool CanCalculateDerivativeCommandxecute(object p)
+		{
+			bool ok = false;
+			if (selectedDerivativeFunction.Method.Name == nameof(CalculateFirstDerivative))
+				ok = !string.IsNullOrWhiteSpace(FunctionFirstDerivativeString);
+			else if (selectedDerivativeFunction.Method.Name == nameof(CalculateSecondDerivative))
+				ok = !string.IsNullOrWhiteSpace(FunctionSecondDerivativeString);
+			else if (selectedDerivativeFunction.Method.Name == nameof(CalculateThirdDerivative))
+				ok = !string.IsNullOrWhiteSpace(FunctionThirdDerivativeString);
+			return ok && CanGenerateFunctionTableCommandxecute(p);
+		}
 		#endregion
 
 
@@ -135,12 +193,43 @@ namespace KantorLr8.ViewModels
 
 		private void CalculateFirstDerivative()
 		{
-
+			Function f = new Function(FunctionFirstDerivativeString);
+			Expression expression;
+			double doubleStep = Convert.ToDouble(StepdText) * 2;
+			double firstCalculatedValue = (FunctionTable[1].Y - secondPoint.Y) / doubleStep;
+			expression = new Expression($"f({FunctionTable[0].X.ToString().Replace(",", ".")})", f);
+			DerivativeTable.Add(new DerivativeComparator(FunctionTable[0].X, firstCalculatedValue, expression.calculate()));
+			double value;
+			for (int i = 1; i < FunctionTable.Count - 1; i++)
+			{
+				value = (FunctionTable[i + 1].Y - FunctionTable[i - 1].Y) / doubleStep;
+				expression = new Expression($"f({FunctionTable[i].X.ToString().Replace(",", ".")})", f);
+				DerivativeTable.Add(new DerivativeComparator(FunctionTable[i].X, value, expression.calculate()));
+			}
+			double lastCalculatedValue = (_penultimatePoint.Y - FunctionTable[FunctionTable.Count - 2].Y) / doubleStep;
+			expression = new Expression($"f({FunctionTable[FunctionTable.Count - 1].X.ToString().Replace(",", ".")})", f);
+			DerivativeTable.Add(new DerivativeComparator(FunctionTable[FunctionTable.Count - 1].X, lastCalculatedValue, expression.calculate()));
 		}
 
 		private void CalculateSecondDerivative()
 		{
-
+			Function f = new Function(FunctionSecondDerivativeString);
+			Expression expression;
+			double step = Convert.ToDouble(StepdText);
+			double quadroStep = step * step;
+			double first = (secondPoint.Y - 2 * FunctionTable[0].Y + FunctionTable[1].Y) / quadroStep;
+			expression = new Expression($"f({FunctionTable[0].X.ToString().Replace(",", ".")})", f);
+			DerivativeTable.Add(new DerivativeComparator(FunctionTable[0].X, first, expression.calculate()));
+			double value;
+			for (int i = 1; i < FunctionTable.Count - 1; i++)
+			{
+				value = (FunctionTable[i - 1].Y - 2 * FunctionTable[i].Y + FunctionTable[i + 1].Y) / quadroStep;
+				expression = new Expression($"f({FunctionTable[0].X.ToString().Replace(",", ".")})", f);
+				DerivativeTable.Add(new DerivativeComparator(FunctionTable[i].X, value, expression.calculate()));
+			}
+			double last = (FunctionTable[FunctionTable.Count - 2].Y - 2 * FunctionTable[FunctionTable.Count - 1].Y + _penultimatePoint.Y) / quadroStep;
+			expression = new Expression($"f({FunctionTable[FunctionTable.Count - 1].X.ToString().Replace(",", ".")})", f);
+			DerivativeTable.Add(new DerivativeComparator(FunctionTable[FunctionTable.Count - 1].X, last, expression.calculate()));
 		}
 
 		private void CalculateThirdDerivative()
