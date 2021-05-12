@@ -234,7 +234,29 @@ namespace KantorLr8.ViewModels
 
 		private void CalculateThirdDerivative()
 		{
-
+			Function f = new Function(FunctionThirdDerivativeString);
+			Expression expression;
+			double step = Convert.ToDouble(StepdText);
+			double tripleStep = step * step * step * 2;
+			double firstValue = (-1 * _firstPoint.Y + 2 * secondPoint.Y - 2 * FunctionTable[1].Y + FunctionTable[2].Y) / tripleStep;
+			expression = new Expression($"f({FunctionTable[0].X.ToString().Replace(",", ".")})", f);
+			DerivativeTable.Add(new DerivativeComparator(FunctionTable[0].X, firstValue, expression.calculate()));
+			double secondValue = (-1 * secondPoint.Y + 2 * FunctionTable[0].Y - 2 * FunctionTable[2].Y + FunctionTable[3].Y) / tripleStep;
+			expression = new Expression($"f({FunctionTable[1].X.ToString().Replace(",", ".")})", f);
+			DerivativeTable.Add(new DerivativeComparator(FunctionTable[1].X, secondValue, expression.calculate()));
+			double value;
+			for (int i = 2; i < FunctionTable.Count - 2; i++)
+			{
+				value = (-1 * FunctionTable[i - 2].Y + 2 * FunctionTable[i - 1].Y - 2 * FunctionTable[i + 1].Y + FunctionTable[i + 2].Y) / tripleStep;
+				expression = new Expression($"f({FunctionTable[i].X.ToString().Replace(",", ".")})", f);
+				DerivativeTable.Add(new DerivativeComparator(FunctionTable[i].X, value, expression.calculate()));
+			}
+			double penultimateValue = (-1 * FunctionTable[FunctionTable.Count - 4].Y + 2 * FunctionTable[FunctionTable.Count - 3].Y - 2 * FunctionTable[FunctionTable.Count - 1].Y + _penultimatePoint.Y) / tripleStep;
+			expression = new Expression($"f({FunctionTable[FunctionTable.Count - 2].X.ToString().Replace(",", ".")})", f);
+			DerivativeTable.Add(new DerivativeComparator(FunctionTable[FunctionTable.Count - 2].X, penultimateValue, expression.calculate()));
+			double lastValue = (-1 * FunctionTable[FunctionTable.Count - 3].Y + 2 * FunctionTable[FunctionTable.Count - 2].Y - 2 * _penultimatePoint.Y + _lastPoint.Y) / tripleStep;
+			expression = new Expression($"f({FunctionTable[FunctionTable.Count - 1].X})", f);
+			DerivativeTable.Add(new DerivativeComparator(FunctionTable[FunctionTable.Count - 1].X, lastValue, expression.calculate()));
 		}
 	}
 }
