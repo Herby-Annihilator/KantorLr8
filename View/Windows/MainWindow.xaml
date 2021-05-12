@@ -1,0 +1,113 @@
+﻿<Window x:Class="KantorLr8.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KantorLr8"
+        mc:Ignorable="d"
+        Title="{Binding Title}" Height="662" Width="877"
+        DataContext="{Binding MainWindowViewModel, Source={StaticResource Locator}}">
+    <Window.Resources>
+        <Style TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="CanUserSortColumns" Value="False"/>
+            <Setter Property="AlternatingRowBackground" Value="Aquamarine"/>
+            <Setter Property="VerticalGridLinesBrush" Value="BlueViolet"/>
+            <Setter Property="GridLinesVisibility" Value="Vertical"/>
+        </Style>
+    </Window.Resources>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Fuck you"/>
+            </MenuItem>
+            <MenuItem Header="Help"/>
+        </Menu>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem Content="Binding"/>
+        </StatusBar>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <DockPanel Grid.Column="0">
+                <StackPanel Margin="0,5" DockPanel.Dock="Bottom" Orientation="Horizontal">
+                    <Button Content="Добавить строку" HorizontalAlignment="Right" Command="{Binding AddNewPointCommand}"/>
+                    <Button Content="Удалить выделенную" Margin="5,0" Command="{Binding RemoveSelectedPointCommand}"/>
+                    <Button Content="Сохранить" Margin="5,0" Command="{Binding SaveSplineTableCommand}"/>
+                    <Button Content="Восстановить" Command="{Binding RestoreSplineTableCommand}"/>
+                </StackPanel>
+                <DataGrid MinWidth="250" Width="250" ItemsSource="{Binding SplineTable}" SelectedItem="{Binding SelectedPoint}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Аргумент" Binding="{Binding X}"/>
+                        <DataGridTextColumn Header="Значение функции" Width="*" Binding="{Binding Y}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Margin="5,0">
+                    <StackPanel Margin="0,0,0,15">
+                        <TextBlock TextWrapping="Wrap" Width="230" HorizontalAlignment="Left" Text="В строке ниже введите аналитический вид желаемой функции, например, f(x) = x + 2"/>
+                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="BlueViolet" Text="{Binding FunctionText, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    
+                    <TextBlock Width="230" TextWrapping="Wrap" Text="Сгенерировать таблицу значений (нужно ввести функцию)"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="От"/>
+                        <TextBox Margin="5,0" Width="50" Text="{Binding GenerateTableLeftBoard, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="До" Margin="15,0,0,0"/>
+                        <TextBox Margin="5,0" Width="50" Text="{Binding GenerateTableRightBoard, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="Шаг"/>
+                        <TextBox Margin="5,0" Width="50" Text="{Binding GenerateTableStep, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Content="Сгенерировать" Margin="5,0" Command="{Binding GenerateTableCommand}"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,15">
+                        <TextBlock TextWrapping="Wrap" Text="Внести в таблицу возмущения" HorizontalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,7" HorizontalAlignment="Center">
+                            <TextBlock Text="Модуль δ"/>
+                            <TextBox Width="95" Margin="15,0"/>
+                        </StackPanel>
+                        <Button Content="Внести" HorizontalAlignment="Right" Width="95"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,15,0,0">
+                        <TextBlock TextWrapping="Wrap" Width="230" HorizontalAlignment="Left" Text="В строке ниже введите аналитический вид первой производной функции выше"/>
+                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="Brown" Text="{Binding FunctionText, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock TextWrapping="Wrap" Width="230" HorizontalAlignment="Left" Text="В строке ниже введите аналитический вид второй производной функции выше"/>
+                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="CornflowerBlue" Text="{Binding FunctionText, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock TextWrapping="Wrap" Width="230" HorizontalAlignment="Left" Text="В строке ниже введите аналитический вид третьей производной функции выше"/>
+                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="DarkTurquoise" Text="{Binding FunctionText, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </StackPanel>
+            </DockPanel>
+            <DockPanel Grid.Column="1" Margin="5,0" MinWidth="200">
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Text="Рассчеты для выбранной производной"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <RadioButton Content="Первая" IsChecked="True"/>
+                        <RadioButton Content="Вторая" Margin="15,0"/>
+                        <RadioButton Content="Третья"/>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5" HorizontalAlignment="Right" DockPanel.Dock="Bottom">
+                    <Button Content="Очистить таблицу" Margin="0,0,5,0"/>
+                    <Button Content="Рассчитать"/>
+                </StackPanel>
+                <DataGrid>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Точка"/>
+                        <DataGridTextColumn Header="Вычисленное значение"/>
+                        <DataGridTextColumn Header="Точное значение"/>
+                        <DataGridTextColumn Header="Разница" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>
