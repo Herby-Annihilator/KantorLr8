@@ -26,7 +26,7 @@
             <MenuItem Header="Help"/>
         </Menu>
         <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem Content="Binding"/>
+            <StatusBarItem Content="{Binding Status}"/>
         </StatusBar>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -35,12 +35,11 @@
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Column="0">
                 <StackPanel Margin="0,5" DockPanel.Dock="Bottom" Orientation="Horizontal">
-                    <Button Content="Добавить строку" HorizontalAlignment="Right" Command="{Binding AddNewPointCommand}"/>
-                    <Button Content="Удалить выделенную" Margin="5,0" Command="{Binding RemoveSelectedPointCommand}"/>
-                    <Button Content="Сохранить" Margin="5,0" Command="{Binding SaveSplineTableCommand}"/>
-                    <Button Content="Восстановить" Command="{Binding RestoreSplineTableCommand}"/>
+                    <Button Content="Добавить строку" HorizontalAlignment="Right" Command="{Binding AddNewPointInFunctionTableCommand}"/>
+                    <Button Content="Удалить выделенную" Margin="5,0" Command="{Binding RemoveSelectedPointInFunctionTableCommand}"/>
+                  
                 </StackPanel>
-                <DataGrid MinWidth="250" Width="250" ItemsSource="{Binding SplineTable}" SelectedItem="{Binding SelectedPoint}">
+                <DataGrid MinWidth="250" Width="250" ItemsSource="{Binding FunctionTable}" SelectedItem="{Binding SelectedPointInFunctionTable}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Аргумент" Binding="{Binding X}"/>
                         <DataGridTextColumn Header="Значение функции" Width="*" Binding="{Binding Y}"/>
@@ -49,40 +48,40 @@
                 <StackPanel Margin="5,0">
                     <StackPanel Margin="0,0,0,15">
                         <TextBlock TextWrapping="Wrap" Width="230" HorizontalAlignment="Left" Text="В строке ниже введите аналитический вид желаемой функции, например, f(x) = x + 2"/>
-                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="BlueViolet" Text="{Binding FunctionText, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="BlueViolet" Text="{Binding FunctionString, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                     
                     <TextBlock Width="230" TextWrapping="Wrap" Text="Сгенерировать таблицу значений (нужно ввести функцию)"/>
                     <StackPanel Orientation="Horizontal" Margin="0,5">
                         <TextBlock Text="От"/>
-                        <TextBox Margin="5,0" Width="50" Text="{Binding GenerateTableLeftBoard, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Margin="5,0" Width="50" Text="{Binding LeftBoardText, UpdateSourceTrigger=PropertyChanged}"/>
                         <TextBlock Text="До" Margin="15,0,0,0"/>
-                        <TextBox Margin="5,0" Width="50" Text="{Binding GenerateTableRightBoard, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Margin="5,0" Width="50" Text="{Binding RightBoardText, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,5">
                         <TextBlock Text="Шаг"/>
-                        <TextBox Margin="5,0" Width="50" Text="{Binding GenerateTableStep, UpdateSourceTrigger=PropertyChanged}"/>
-                        <Button Content="Сгенерировать" Margin="5,0" Command="{Binding GenerateTableCommand}"/>
+                        <TextBox Margin="5,0" Width="50" Text="{Binding StepdText, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Content="Сгенерировать" Margin="5,0" Command="{Binding GenerateFunctionTableCommand}"/>
                     </StackPanel>
                     <StackPanel Margin="0,15">
                         <TextBlock TextWrapping="Wrap" Text="Внести в таблицу возмущения" HorizontalAlignment="Center"/>
                         <StackPanel Orientation="Horizontal" Margin="0,7" HorizontalAlignment="Center">
                             <TextBlock Text="Модуль δ"/>
-                            <TextBox Width="95" Margin="15,0"/>
+                            <TextBox Width="95" Margin="15,0" Text="{Binding Delta, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
-                        <Button Content="Внести" HorizontalAlignment="Right" Width="95"/>
+                        <Button Content="Внести" HorizontalAlignment="Right" Width="95" Command="{Binding AddDeltaToFunctionTableCommand}"/>
                     </StackPanel>
                     <StackPanel Margin="0,15,0,0">
                         <TextBlock TextWrapping="Wrap" Width="230" HorizontalAlignment="Left" Text="В строке ниже введите аналитический вид первой производной функции выше"/>
-                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="Brown" Text="{Binding FunctionText, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="Brown" Text="{Binding FunctionFirstDerivativeString, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                     <StackPanel>
                         <TextBlock TextWrapping="Wrap" Width="230" HorizontalAlignment="Left" Text="В строке ниже введите аналитический вид второй производной функции выше"/>
-                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="CornflowerBlue" Text="{Binding FunctionText, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="CornflowerBlue" Text="{Binding FunctionSecondDerivativeString, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                     <StackPanel>
                         <TextBlock TextWrapping="Wrap" Width="230" HorizontalAlignment="Left" Text="В строке ниже введите аналитический вид третьей производной функции выше"/>
-                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="DarkTurquoise" Text="{Binding FunctionText, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Width="230" HorizontalAlignment="Left" Margin="0,10" FontSize="18" FontWeight="Bold" Foreground="DarkTurquoise" Text="{Binding FunctionThirdDerivativeString, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </StackPanel>
             </DockPanel>
@@ -96,15 +95,15 @@
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,5" HorizontalAlignment="Right" DockPanel.Dock="Bottom">
-                    <Button Content="Очистить таблицу" Margin="0,0,5,0"/>
-                    <Button Content="Рассчитать"/>
+                    <Button Content="Очистить таблицу" Margin="0,0,5,0" Command="{Binding ClearDerivativeTableCommand}"/>
+                    <Button Content="Рассчитать" Command="{Binding CalculateDerivativeCommand}"/>
                 </StackPanel>
-                <DataGrid>
+                <DataGrid ItemsSource="{Binding DerivativeTable}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Точка"/>
-                        <DataGridTextColumn Header="Вычисленное значение"/>
-                        <DataGridTextColumn Header="Точное значение"/>
-                        <DataGridTextColumn Header="Разница" Width="*"/>
+                        <DataGridTextColumn Header="Точка" Binding="{Binding Argument}"/>
+                        <DataGridTextColumn Header="Вычисленное значение" Binding="{Binding CalculatedDerivativeValue}"/>
+                        <DataGridTextColumn Header="Точное значение" Binding="{Binding RealDerivativeValue}"/>
+                        <DataGridTextColumn Header="Разница" Width="*" Binding="{Binding Difference}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </DockPanel>

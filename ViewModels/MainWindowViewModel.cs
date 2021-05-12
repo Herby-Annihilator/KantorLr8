@@ -30,6 +30,8 @@ namespace KantorLr8.ViewModels
 			AddNewPointInFunctionTableCommand = new LambdaCommand(OnAddNewPointInFunctionTableCommandExecuted, CanAddNewPointInFunctionTableCommandxecute);
 			GenerateFunctionTableCommand = new LambdaCommand(OnGenerateFunctionTableCommandExecuted, CanGenerateFunctionTableCommandxecute);
 			CalculateDerivativeCommand = new LambdaCommand(OnCalculateDerivativeCommandExecuted, CanCalculateDerivativeCommandxecute);
+			ClearDerivativeTableCommand = new LambdaCommand(OnClearDerivativeTableCommandExecuted, CanClearDerivativeTableCommandExecute);
+			AddDeltaToFunctionTableCommand = new LambdaCommand(OnAddDeltaToFunctionTableCommandExecuted, CanAddDeltaToFunctionTableCommandExecute);
 		}
 
 		#region Properties
@@ -68,6 +70,9 @@ namespace KantorLr8.ViewModels
 
 		private Point _selectedPointInFunctionTable;
 		public Point SelectedPointInFunctionTable { get => _selectedPointInFunctionTable; set => Set(ref _selectedPointInFunctionTable, value); }
+
+		private string _delta;
+		public string Delta { get => _delta; set => Set(ref _delta, value); }
 		#endregion
 
 		#region Commands
@@ -82,6 +87,31 @@ namespace KantorLr8.ViewModels
 				selectedDerivativeFunction = CalculateThirdDerivative;
 		}
 		private bool CanSelectCalculatingDeriavtiveCommandExecute(object p) => true;
+
+		public ICommand AddDeltaToFunctionTableCommand { get; }
+		private void OnAddDeltaToFunctionTableCommandExecuted(object p)
+		{
+			try
+			{
+				Random random = new Random();
+				double delta = Math.Abs(Convert.ToDouble(Delta));
+				double value;
+				for (int i = 0; i < FunctionTable.Count; i++)
+				{
+					value = random.NextDouble();
+					if (value > delta)
+						value = delta;
+					FunctionTable[i].Y += value;
+					FunctionTable[i].OnPropertyChanged("Y");
+				}
+				Status = "Изменения успешно внесены";
+			}
+			catch (Exception e)
+			{
+				Status = $"Опреация провалена. Причина: {e.Message}";
+			}			
+		}
+		private bool CanAddDeltaToFunctionTableCommandExecute(object p) => !string.IsNullOrWhiteSpace(Delta) && FunctionTable.Count > 0;
 
 		public ICommand RemoveSelectedPointInFunctionTableCommand { get; }
 		private void OnRemoveSelectedPointInFunctionTableCommandExecuted(object p)
@@ -120,6 +150,24 @@ namespace KantorLr8.ViewModels
 			return true;
 		}
 
+		public ICommand ClearDerivativeTableCommand { get; }
+		private void OnClearDerivativeTableCommandExecuted(object p)
+		{
+			try
+			{
+				DerivativeTable.Clear();
+				Status = $"Таблица очищена";
+			}
+			catch (Exception e)
+			{
+				Status = $"Опреация провалена. Причина: {e.Message}";
+			}
+		}
+		private bool CanClearDerivativeTableCommandExecute(object p)
+		{
+			return DerivativeTable.Count > 0;
+		}
+
 		public ICommand GenerateFunctionTableCommand { get; }
 		private void OnGenerateFunctionTableCommandExecuted(object p)
 		{
@@ -131,23 +179,24 @@ namespace KantorLr8.ViewModels
 				double right = Convert.ToDouble(RightBoardText);
 				double step = Convert.ToDouble(StepdText);
 				FunctionTable.Clear();
+				
+				for (double i = left; i < right; i += step)
+				{
+					expression = new Expression($"f({i.ToString().Replace(",", ".")})", function);
+					FunctionTable.Add(new Point(i, expression.calculate()));
+				}
+
 				expression = new Expression($"f({(left - step * 2).ToString().Replace(",", ".")})", function);
 				_firstPoint = new Point(left - step * 2, expression.calculate());
 
 				expression = new Expression($"f({(left - step).ToString().Replace(",", ".")})", function);
 				secondPoint = new Point(left - step, expression.calculate());
 
-				expression = new Expression($"f({(right + step).ToString().Replace(",", ".")})", function);
-				_penultimatePoint = new Point(right + step, expression.calculate());
+				expression = new Expression($"f({(FunctionTable[^1].X + step).ToString().Replace(",", ".")})", function);
+				_penultimatePoint = new Point(FunctionTable[^1].X + step, expression.calculate());
 
-				expression = new Expression($"f({(right + step * 2).ToString().Replace(",", ".")})", function);
-				_lastPoint = new Point(right + step * 2, expression.calculate());
-
-				for (double i = left; i < right; i += step)
-				{
-					expression = new Expression($"f({i.ToString().Replace(",", ".")})", function);
-					FunctionTable.Add(new Point(i, expression.calculate()));
-				}
+				expression = new Expression($"f({(FunctionTable[^1].X + step * 2).ToString().Replace(",", ".")})", function);
+				_lastPoint = new Point(FunctionTable[^1].X + step * 2, expression.calculate());
 				Status = "Генерация прошла успешно!";
 			}
 			catch (Exception e)
@@ -224,7 +273,7 @@ namespace KantorLr8.ViewModels
 			for (int i = 1; i < FunctionTable.Count - 1; i++)
 			{
 				value = (FunctionTable[i - 1].Y - 2 * FunctionTable[i].Y + FunctionTable[i + 1].Y) / quadroStep;
-				expression = new Expression($"f({FunctionTable[0].X.ToString().Replace(",", ".")})", f);
+				expression = new Expression($"f({FunctionTable[i].X.ToString().Replace(",", ".")})", f);
 				DerivativeTable.Add(new DerivativeComparator(FunctionTable[i].X, value, expression.calculate()));
 			}
 			double last = (FunctionTable[FunctionTable.Count - 2].Y - 2 * FunctionTable[FunctionTable.Count - 1].Y + _penultimatePoint.Y) / quadroStep;
@@ -255,7 +304,7 @@ namespace KantorLr8.ViewModels
 			expression = new Expression($"f({FunctionTable[FunctionTable.Count - 2].X.ToString().Replace(",", ".")})", f);
 			DerivativeTable.Add(new DerivativeComparator(FunctionTable[FunctionTable.Count - 2].X, penultimateValue, expression.calculate()));
 			double lastValue = (-1 * FunctionTable[FunctionTable.Count - 3].Y + 2 * FunctionTable[FunctionTable.Count - 2].Y - 2 * _penultimatePoint.Y + _lastPoint.Y) / tripleStep;
-			expression = new Expression($"f({FunctionTable[FunctionTable.Count - 1].X})", f);
+			expression = new Expression($"f({FunctionTable[FunctionTable.Count - 1].X.ToString().Replace(",", ".")})", f);
 			DerivativeTable.Add(new DerivativeComparator(FunctionTable[FunctionTable.Count - 1].X, lastValue, expression.calculate()));
 		}
 	}
