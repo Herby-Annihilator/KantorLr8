@@ -90,9 +90,9 @@
                 <StackPanel DockPanel.Dock="Top">
                     <TextBlock Text="Рассчеты для выбранной производной"/>
                     <StackPanel Orientation="Horizontal" Margin="0,5">
-                        <RadioButton Content="Первая" IsChecked="True"/>
-                        <RadioButton Content="Вторая" Margin="15,0"/>
-                        <RadioButton Content="Третья"/>
+                        <RadioButton Content="Первая" IsChecked="True" Command="{Binding SelectCalculatingDeriavtiveCommand}" CommandParameter="1"/>
+                        <RadioButton Content="Вторая" Margin="15,0" Command="{Binding SelectCalculatingDeriavtiveCommand}" CommandParameter="2"/>
+                        <RadioButton Content="Третья" Command="{Binding SelectCalculatingDeriavtiveCommand}" CommandParameter="3"/>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,5" HorizontalAlignment="Right" DockPanel.Dock="Bottom">
